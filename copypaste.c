@@ -8,7 +8,7 @@ int main(void)
 int eventTap(void)
 {
 	CGEventMask eventMask = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventFlagsChanged);
-	CFMachPortRef eventTap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, 0, eventMask, CGEventCallback, NULL);
+	CFMachPortRef eventTap = CGEventTapCreate(0, 1, 0, eventMask, CGEventCallback, NULL);
 	if(!eventTap)
 	{
 		printf("ERROR: Unable to create event tap.\n");
@@ -19,7 +19,7 @@ int eventTap(void)
 	CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
 	CGEventTapEnable(eventTap, true);
 	CFRunLoopRun();
-	return update();
+	return 0;
 }
 
 CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
@@ -71,44 +71,50 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
 
     bool shift = flags & kCGEventFlagMaskShift;
     bool caps = flags & kCGEventFlagMaskAlphaShift;
-	bool cmd = (prev == 55 || prev == 54);
-	if(cmd && keyCode == kVK_ANSI_C){ // CMD + C
-		printf("Copy to clipboard\n");
-		update();
-	}
-	if(cmd && shift && keyCode == kVK_ANSI_V){ // CMD + shift + V
-		printf("open menu for selecting copied content");
-	}
-	prev = keyCode;
+    bool cmd = (prev == 55 || prev == 54);
+    if(cmd && keyCode == kVK_ANSI_C){ // CMD + C
+      	printf("Copy to clipboard\n");
+
+        pid_t child = fork();
+        if(child == 0){
+            update();
+        }
+    }
+    if(cmd && shift && keyCode == kVK_ANSI_V){ // CMD + shift + V
+ 	    printf("open menu for selecting copied content");
+    }
+    prev = keyCode;
 	
     return event;
 }
 
 int update(void)
 {
-	FILE *pb = popen("/usr/bin/pbpaste", "r");
+    FILE *pb = popen("/usr/bin/pbpaste", "r");
 
-	char paste[MAX_SIZE] = {};
-	if(pb == NULL){
-		printf("Failed to run pbpaste");
-		exit(1);
-	}
+    char paste[MAX_SIZE] = {};
+    if(pb == NULL){
+        printf("Failed to run pbpaste");
+        exit(1);
+    }
 
-	while(fgets(paste, sizeof(paste), pb) != NULL) {
-		char filename[40] = {};
-		struct tm *timenow = {0};
+    // sleep(1);
+    while(fgets(paste, sizeof(paste), pb) != NULL) {
+        char filename[40] = {};
+        struct tm *timenow = {0};
 
-		time_t now = time(NULL);
-		timenow = gmtime(&now);
+        time_t now = time(NULL);
+        timenow = gmtime(&now);
 
-		strftime(filename, sizeof(filename), "copy_%Y-%m-%d_%H:%M:%S.txt", timenow);
+        strftime(filename, sizeof(filename), "copy_%Y-%m-%d_%H:%M:%S.txt", timenow);
 
-		FILE *history = fopen(filename, "a+");
-		fputs(paste, history);
-		fputs("\n", history);
-		fclose(history);
-	}
+        FILE *history = fopen(filename, "a+");
+        fputs(paste, history);
+        printf("%s\n", paste);
+        fputs("\n", history);
+        fclose(history);
+    }
+    pclose(pb);
 
-	pclose(pb);
 	return 0;
 }
