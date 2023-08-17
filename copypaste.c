@@ -98,7 +98,6 @@ int update(void)
         exit(1);
     }
 
-    // sleep(1);
     while(fgets(paste, sizeof(paste), pb) != NULL) {
         char filename[40] = {};
         struct tm *timenow = {0};
