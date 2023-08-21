@@ -7,3 +7,11 @@ Currently only support MacOS, it requires permissions set privacy / security ena
 It reads from system event CMD-C to write pbpaste to file.
 
 
+It currently supports 10 entries.
+
+Using CMD-2 followed by CMD-V will paste the content of entry 2.
+
+CMD-[N]
+N:= [0..9]
+
+
