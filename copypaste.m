@@ -22,7 +22,7 @@ AppDelegate *globalDelegate = nil;
                                                           NSWindowStyleMaskResizable)
                                                  backing:NSBackingStoreBuffered
                                                    defer:NO];
-    [self.window setTitle:@"Text Display"];
+    [self.window setTitle:@"CopyPaste"];
     [self.window makeKeyAndOrderFront:nil];
 
     self.textField = [[NSTextField alloc] initWithFrame:NSMakeRect(20, 20, 760, 560)];
@@ -31,6 +31,8 @@ AppDelegate *globalDelegate = nil;
     [self.textField setEditable:NO];
     [self.textField setSelectable:YES];
     [[self.window contentView] addSubview:self.textField];
+    [NSApp activateIgnoringOtherApps:YES];
+
     globalDelegate = self;
 }
 
@@ -200,9 +202,9 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
     bool cmd = (prev == 55 || prev == 54);
     if(cmd && keyCode == kVK_ANSI_C){ // CMD + C
       	printf("Copy to clipboard\n");
-        if(fork() == 0){
+        // if(fork() == 0){
             update();
-        }
+        // }
     }
 
     Stack stack;
@@ -213,7 +215,7 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
  	    printf("open menu for selecting copied content");
         BringToFrontFromC();
     }
-    if(cmd || down){
+    if(cmd){
         int index = get_index(keyCode) - 1;
         if(index >= 0 && index <= stack.top){
             int timestamp = stack.data[index];
@@ -223,6 +225,10 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
             if(content != NULL){
                copyToClipboard(content);
                UpdateTextFromC(content);
+            }
+
+            if ([globalDelegate.window level] == NSFloatingWindowLevel) {
+               return NULL;
             }
         }
     }
