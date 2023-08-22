@@ -1,5 +1,5 @@
 
-#define STACK_SIZE 5
+#define STACK_SIZE 10
 #include <stdio.h>
 #include <stdlib.h>
 

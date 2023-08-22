@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-framework ApplicationServices -framework Carbon
-SOURCES=copypaste.c
+CFLAGS=-framework ApplicationServices -framework Cocoa
+SOURCES=copypaste.m
 EXECUTABLE=copypaste
 
 all: $(SOURCES)
