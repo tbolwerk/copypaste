@@ -3,7 +3,6 @@
 #include "stack.h"
 #define DYNAMIC_STRING_IMPL
 #include "dynamic_string.h"
-
 #import <Cocoa/Cocoa.h>
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
@@ -129,13 +128,7 @@ void update_clipboard_entries(Stack* stack)
     } else {
         perror("Error opening directory");
     }
-    // display(stack);
 }
-
-// int main(void)
-// {
-// 	return eventTap();
-// }
 
 int eventTap()
 {
@@ -189,21 +182,6 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
         case 55: // [left-cmd]
             down = (flags & kCGEventFlagMaskCommand) && !(lastFlags & kCGEventFlagMaskCommand);
             break;
-        // case 56: // [left-shift]
-        // case 60: // [right-shift]
-        //     down = (flags & kCGEventFlagMaskShift) && !(lastFlags & kCGEventFlagMaskShift);
-        //     break;
-        // case 58: // [left-option]
-        // case 61: // [right-option]
-        //     down = (flags & kCGEventFlagMaskAlternate) && !(lastFlags & kCGEventFlagMaskAlternate);
-        //     break;
-        // case 59: // [left-ctrl]
-        // case 62: // [right-ctrl]
-        //     down = (flags & kCGEventFlagMaskControl) && !(lastFlags & kCGEventFlagMaskControl);
-        //     break;
-        // case 57: // [caps]
-        //     down = (flags & kCGEventFlagMaskAlphaShift) && !(lastFlags & kCGEventFlagMaskAlphaShift);
-        //     break;
         default:
             break;
         }

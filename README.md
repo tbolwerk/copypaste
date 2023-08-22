@@ -14,4 +14,4 @@ Using CMD-2 followed by CMD-V will paste the content of entry 2.
 CMD-[N]
 N:= [0..9]
 
-
+With CMD SHIFT V a window will pop up, showing a entry select using above mentioned selection method CMD-[1..9]
