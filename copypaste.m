@@ -36,7 +36,6 @@ AppDelegate *globalDelegate = nil;
 }
 
 - (void)setTextFieldContent:(const char *)content {
-    printf("%s\n", content);
     NSString *string = [NSString stringWithUTF8String:content];
     [self.textField setStringValue:string];
 }
@@ -48,7 +47,7 @@ void UpdateTextFromC(const char *newText) {
     [globalDelegate setTextFieldContent:newText];
 });
 }
-
+char* content ;
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -59,18 +58,9 @@ int main(int argc, const char * argv[]) {
         [app setDelegate:delegate];
         [app run];
     }
-
+    free(content);
     return 0;
 }
-
-
-
-
-
-
-
-
-
 
 int prev = -1;
 CGEventFlags lastFlags = 0;
@@ -235,17 +225,14 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
     }
     if(cmd || down){
         int index = get_index(keyCode) - 1;
-        printf("index = %d\n", index);
         if(index >= 0 && index <= stack.top){
             int timestamp = stack.data[index];
-            printf("selected: %d\n", timestamp);
             dynamic_string ds = {};
             get_clipboard_entry_filename(&ds, timestamp);
-            char* content = readFile(ds.s);
+            content = readFile(ds.s);
             if(content != NULL){
                copyToClipboard(content);
                UpdateTextFromC(content);
-               free(content);
             }
         }
     }
@@ -310,7 +297,6 @@ int update()
         strftime(filename, sizeof(filename), "copy_%s.txt", timenow);
         FILE *history = fopen(filename, "a+");
         fputs(paste, history);
-        printf("%s\n", paste);
         fputs("\n", history);
         fclose(history);
     }
