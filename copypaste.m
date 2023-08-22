@@ -41,7 +41,18 @@ AppDelegate *globalDelegate = nil;
 }
 
 @end
-
+void BringToFrontFromC() {
+ dispatch_async(dispatch_get_main_queue(), ^{
+        if ([globalDelegate.window level] == NSFloatingWindowLevel) {
+        // If the window is currently the key window, minimize it
+            [globalDelegate.window setLevel:NSNormalWindowLevel];
+        } else {
+            // If the window is not the key window, bring it to the front
+            [globalDelegate.window makeKeyAndOrderFront:nil];
+            [globalDelegate.window setLevel:NSFloatingWindowLevel];
+        }
+    });
+}
 void UpdateTextFromC(const char *newText) {
     dispatch_async(dispatch_get_main_queue(), ^{
     [globalDelegate setTextFieldContent:newText];
@@ -222,6 +233,7 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
 
     if(cmd && shift && keyCode == kVK_ANSI_V){ // CMD + shift + V
  	    printf("open menu for selecting copied content");
+        BringToFrontFromC();
     }
     if(cmd || down){
         int index = get_index(keyCode) - 1;
