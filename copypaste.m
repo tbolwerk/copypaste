@@ -3,7 +3,77 @@
 #include "stack.h"
 #define DYNAMIC_STRING_IMPL
 #include "dynamic_string.h"
-#include <dirent.h>
+
+#import <Cocoa/Cocoa.h>
+
+@interface AppDelegate : NSObject <NSApplicationDelegate>
+@property (strong, nonatomic) NSWindow *window;
+@property (strong, nonatomic) NSTextField *textField;
+@end
+
+AppDelegate *globalDelegate = nil;
+
+@implementation AppDelegate
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    NSRect frame = NSMakeRect(0, 0, 800, 600);
+    self.window = [[NSWindow alloc] initWithContentRect:frame
+                                               styleMask:(NSWindowStyleMaskTitled |
+                                                          NSWindowStyleMaskClosable |
+                                                          NSWindowStyleMaskResizable)
+                                                 backing:NSBackingStoreBuffered
+                                                   defer:NO];
+    [self.window setTitle:@"Text Display"];
+    [self.window makeKeyAndOrderFront:nil];
+
+    self.textField = [[NSTextField alloc] initWithFrame:NSMakeRect(20, 20, 760, 560)];
+    [self.textField setBezeled:NO];
+    [self.textField setDrawsBackground:NO];
+    [self.textField setEditable:NO];
+    [self.textField setSelectable:YES];
+    [[self.window contentView] addSubview:self.textField];
+    globalDelegate = self;
+}
+
+- (void)setTextFieldContent:(const char *)content {
+    printf("%s\n", content);
+    NSString *string = [NSString stringWithUTF8String:content];
+    [self.textField setStringValue:string];
+}
+
+@end
+
+void UpdateTextFromC(const char *newText) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+    [globalDelegate setTextFieldContent:newText];
+});
+}
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            eventTap();
+        });
+        NSApplication *app = [NSApplication sharedApplication];
+        AppDelegate *delegate = [[AppDelegate alloc] init];
+        [app setDelegate:delegate];
+        [app run];
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+int prev = -1;
+CGEventFlags lastFlags = 0;
 
 void get_clipboard_entry_filename(dynamic_string* ds, int timestamp){
     create_dynamic_string(ds, "copy_");
@@ -61,10 +131,10 @@ void update_clipboard_entries(Stack* stack)
     // display(stack);
 }
 
-int main(void)
-{
-	return eventTap();
-}
+// int main(void)
+// {
+// 	return eventTap();
+// }
 
 int eventTap()
 {
@@ -118,21 +188,21 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
         case 55: // [left-cmd]
             down = (flags & kCGEventFlagMaskCommand) && !(lastFlags & kCGEventFlagMaskCommand);
             break;
-        case 56: // [left-shift]
-        case 60: // [right-shift]
-            down = (flags & kCGEventFlagMaskShift) && !(lastFlags & kCGEventFlagMaskShift);
-            break;
-        case 58: // [left-option]
-        case 61: // [right-option]
-            down = (flags & kCGEventFlagMaskAlternate) && !(lastFlags & kCGEventFlagMaskAlternate);
-            break;
-        case 59: // [left-ctrl]
-        case 62: // [right-ctrl]
-            down = (flags & kCGEventFlagMaskControl) && !(lastFlags & kCGEventFlagMaskControl);
-            break;
-        case 57: // [caps]
-            down = (flags & kCGEventFlagMaskAlphaShift) && !(lastFlags & kCGEventFlagMaskAlphaShift);
-            break;
+        // case 56: // [left-shift]
+        // case 60: // [right-shift]
+        //     down = (flags & kCGEventFlagMaskShift) && !(lastFlags & kCGEventFlagMaskShift);
+        //     break;
+        // case 58: // [left-option]
+        // case 61: // [right-option]
+        //     down = (flags & kCGEventFlagMaskAlternate) && !(lastFlags & kCGEventFlagMaskAlternate);
+        //     break;
+        // case 59: // [left-ctrl]
+        // case 62: // [right-ctrl]
+        //     down = (flags & kCGEventFlagMaskControl) && !(lastFlags & kCGEventFlagMaskControl);
+        //     break;
+        // case 57: // [caps]
+        //     down = (flags & kCGEventFlagMaskAlphaShift) && !(lastFlags & kCGEventFlagMaskAlphaShift);
+        //     break;
         default:
             break;
         }
@@ -151,7 +221,9 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
     bool cmd = (prev == 55 || prev == 54);
     if(cmd && keyCode == kVK_ANSI_C){ // CMD + C
       	printf("Copy to clipboard\n");
-        update();
+        if(fork() == 0){
+            update();
+        }
     }
 
     Stack stack;
@@ -161,16 +233,20 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
     if(cmd && shift && keyCode == kVK_ANSI_V){ // CMD + shift + V
  	    printf("open menu for selecting copied content");
     }
-    if(cmd){
-        int index = get_index(keyCode);
+    if(cmd || down){
+        int index = get_index(keyCode) - 1;
+        printf("index = %d\n", index);
         if(index >= 0 && index <= stack.top){
             int timestamp = stack.data[index];
             printf("selected: %d\n", timestamp);
             dynamic_string ds = {};
             get_clipboard_entry_filename(&ds, timestamp);
             char* content = readFile(ds.s);
-            copyToClipboard(content);
-            free(content);
+            if(content != NULL){
+               copyToClipboard(content);
+               UpdateTextFromC(content);
+               free(content);
+            }
         }
     }
     prev = keyCode;
@@ -215,7 +291,7 @@ char* readFile(const char *filename) {
 
 int update()
 {
-    FILE *pb = popen("/usr/bin/pbpaste", "r");
+    FILE *pb = popen("pbpaste", "r");
 
     char paste[MAX_SIZE] = {};
     if(pb == NULL){
