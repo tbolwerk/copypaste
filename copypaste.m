@@ -166,7 +166,7 @@ int get_index(int keyCode){
 }
 
 CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
-    CGEventRef returnEvent = isInFront ? NULL : event;
+    CGEventRef returnEvent = isInFront ? NULL : event; // Prevent input in background when App is foreground.
 
     if (type != kCGEventKeyDown && type != kCGEventFlagsChanged) {
         return returnEvent;
