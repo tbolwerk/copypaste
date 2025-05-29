@@ -218,10 +218,10 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
  	    printf("open menu for selecting copied content");
         BringToFrontFromC();
     }
-    if(cmd && down){
+    if(cmd && down && isInFront){
         int index = get_index(keyCode) - 1;
-        if(index >= 0 && index <= stack.top){
-            int timestamp = stack.data[index];
+        if(index >= 0 && index <= stack.top) {
+            int timestamp = stack.data[stack.top - index];
             dynamic_string ds = {};
             get_clipboard_entry_filename(&ds, timestamp);
             content = readFile(ds.s);
