@@ -38,15 +38,17 @@ AppDelegate *globalDelegate = nil;
     NSString *string = [NSString stringWithUTF8String:content];
     [self.textField setStringValue:string];
 }
-
+bool isInFront = false;
 @end
 void BringToFrontFromC() {
  dispatch_async(dispatch_get_main_queue(), ^{
         if ([globalDelegate.window level] == NSFloatingWindowLevel) {
         // If the window is currently the key window, minimize it
+            isInFront = false;
             [globalDelegate.window setLevel:NSNormalWindowLevel];
         } else {
             // If the window is not the key window, bring it to the front
+            isInFront = true;
             [globalDelegate.window makeKeyAndOrderFront:nil];
             [globalDelegate.window setLevel:NSFloatingWindowLevel];
         }
@@ -164,8 +166,10 @@ int get_index(int keyCode){
 }
 
 CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
+    CGEventRef returnEvent = isInFront ? NULL : event;
+
     if (type != kCGEventKeyDown && type != kCGEventFlagsChanged) {
-        return event;
+        return returnEvent;
     }
 
     CGEventFlags flags = CGEventGetFlags(event);
@@ -192,18 +196,19 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
 	
     // Only log key down events.
     if (!down) {
-        return event;
+        return returnEvent;
     }
 
     bool shift = flags & kCGEventFlagMaskShift;
     bool caps = flags & kCGEventFlagMaskAlphaShift;
     bool cmd = (prev == 55 || prev == 54);
-    if(cmd && keyCode == kVK_ANSI_C){ // CMD + C
-      	printf("Copy to clipboard\n");
-        if(fork() == 0){
+    if(cmd && keyCode == kVK_ANSI_C){ // CMD + Cif (cmd && keyCode == kVK_ANSI_C) {
+        printf("Copy to clipboard\n");
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             update();
-        }
+        });
     }
+    
 
     Stack stack;
     initialize(&stack);
@@ -213,7 +218,7 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
  	    printf("open menu for selecting copied content");
         BringToFrontFromC();
     }
-    if(cmd || down){
+    if(cmd && down){
         int index = get_index(keyCode) - 1;
         if(index >= 0 && index <= stack.top){
             int timestamp = stack.data[index];
@@ -227,7 +232,7 @@ CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef e
         }
     }
     prev = keyCode;
-    return event;
+    return returnEvent;
 }
 
 void copyToClipboard(const char *text) {
