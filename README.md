@@ -2,7 +2,7 @@
 
 This application is heavily inspired by Paste Ref: https://pasteapp.io/about
 
-Currently only support MacOS, it requires permissions set privacy / security enabled for terminal, when ran in terminal. Otherwise an error occurs eventTap cannot be created.
+Currently only support MacOS, it requires permissions set privacy / security enabled for terminal, when ran in terminal. Otherwise an error occurs eventTap cannot be created. Mainly the input monitoring must be enabled for the terminal that is used.
 
 It reads from system event CMD-C to write pbpaste to file.
 
