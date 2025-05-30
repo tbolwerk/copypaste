@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
+#define CORE_IMPL
+#include "core.h"
 
 int main(int argc, const char * argv[]);
 

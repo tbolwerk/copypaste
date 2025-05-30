@@ -1,11 +1,5 @@
 #include "copypaste.h"
-#define STACK_IMPL
-#include "stack.h"
-#define DYNAMIC_STRING_IMPL
-#include "dynamic_string.h"
 #import <Cocoa/Cocoa.h>
-#define CORE_IMPL
-#include "core.h"
 #include "keymap_mac.c"
 #include <ApplicationServices/ApplicationServices.h>
 #include <Carbon/Carbon.h>

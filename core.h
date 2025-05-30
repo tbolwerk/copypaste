@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <stdbool.h>
 
 void get_clipboard_entry_filename(dynamic_string* ds, int timestamp);
 void remove_clipboard_entry(int timestamp);
