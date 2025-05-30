@@ -1,7 +1,8 @@
 /*
 This library copies the src dynamic_string in order to prevent modifactions during execution of the function. 
 */
-
+#ifndef __DYNAMIC_STRING_H__
+#define __DYNAMIC_STRING_H__
 typedef struct
 {
 	unsigned int capacity;
@@ -169,4 +170,5 @@ char* toString(dynamic_string src)
 	assert(src.s != NULL);
 	return src.s;
 }
+#endif
 #endif

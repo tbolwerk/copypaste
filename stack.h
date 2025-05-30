@@ -1,4 +1,7 @@
 
+#ifndef __STACK_H__
+#define __STACK_H__
+
 #define STACK_SIZE 10
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,4 +71,5 @@ void display(Stack* stack) {
     }
     printf("\n");
 }
+#endif
 #endif
