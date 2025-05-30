@@ -15,3 +15,7 @@ CMD-[N]
 N:= [0..9]
 
 With CMD SHIFT V a window will pop up, showing a entry select using above mentioned selection method CMD-[1..9]
+
+
+## Debian12 X11
+apt-get install libxtst-dev
