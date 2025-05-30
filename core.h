@@ -21,6 +21,15 @@ int copyToDisk();
 void handle_key_event(bool cmd, bool shift, int keyCode);
 
 #ifdef CORE_IMPL
+
+#ifdef __APPLE__
+char* paste_command = "pbpaste";
+char* copy_command = "pbcopy";
+#else
+char* paste_command = "xclip -selection clipboard -o";
+char* copy_command = "xclip -selection clipboard -i";
+#endif
+
 bool isInFront = false;
 char* content = NULL;
 Stack stack = {};
@@ -131,7 +140,7 @@ int get_index(int keyCode)
 
 void copyToClipboard(const char *text)
 {
-    FILE *pipe = popen("pbcopy", "w");
+    FILE *pipe = popen(copy_command, "w");
     if (pipe == NULL) {
         perror("popen");
         return;
@@ -169,12 +178,12 @@ char* readFile(const char *filename)
 
 int copyToDisk()
 {
-    FILE *pb = popen("pbpaste", "r");
+    FILE *pb = popen(paste_command, "r");
 
     char paste[MAX_SIZE] = {};
     if(pb == NULL){
-        printf("Failed to run pbpaste");
-        exit(1);
+        printf("Failed to run %s", paste_command);
+        // exit(1);
     }
 
     while(fgets(paste, sizeof(paste), pb) != NULL) {

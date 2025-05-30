@@ -18,4 +18,4 @@ With CMD SHIFT V a window will pop up, showing a entry select using above mentio
 
 
 ## Debian12 X11
-apt-get install libxtst-dev
+install xclip otherwise it will not work.

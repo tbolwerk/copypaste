@@ -7,18 +7,18 @@
 
 int get_virtual_key(int platform_keycode) {
     switch(platform_keycode) {
-        case XK_C: return KEY_C;
-        case XK_V: return KEY_V;
-        case XK_1: return KEY_1;
-        case XK_2: return KEY_2;
-        case XK_3: return KEY_3;
-        case XK_4: return KEY_4;
-        case XK_5: return KEY_5;
-        case XK_6: return KEY_6;
-        case XK_7: return KEY_7;
-        case XK_8: return KEY_8;
-        case XK_9: return KEY_9;
-        default: return KEY_UNKNOWN;
+        case 99: return KEY_C;
+        case 118: return KEY_V;
+        case 49: return KEY_1;
+        case 50: return KEY_2;
+        case 51: return KEY_3;
+        case 52: return KEY_4;
+        case 53: return KEY_5;
+        case 54: return KEY_6;
+        case 55: return KEY_7;
+        case 56: return KEY_8;
+        case 57: return KEY_9;
+        default: return -1;
     }
 }
 
