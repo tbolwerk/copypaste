@@ -10,9 +10,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
-int update(void);
-void copyToClipboard(const char *text);
-char* readFile(const char *filename);
 int eventTap(void);
 CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon);
 #endif
