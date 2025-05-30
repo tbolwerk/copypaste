@@ -1,7 +1,6 @@
 #include "copypaste.h"
 #include "keymap.h"
 #import <Cocoa/Cocoa.h>
-#include "keymap_mac.c"
 #include <ApplicationServices/ApplicationServices.h>
 #include <Carbon/Carbon.h>
 
