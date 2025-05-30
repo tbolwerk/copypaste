@@ -5,13 +5,12 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include <time.h>
-#include <ApplicationServices/ApplicationServices.h>
-#include <Carbon/Carbon.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
-int eventTap(void);
-CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon);
+
+int main(int argc, const char * argv[]);
+
 #endif
 
 

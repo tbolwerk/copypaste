@@ -4,6 +4,10 @@
 #include "dynamic_string.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <dirent.h>
 
 void get_clipboard_entry_filename(dynamic_string* ds, int timestamp);
 void remove_clipboard_entry(int timestamp);
@@ -14,30 +18,42 @@ int get_index(int keyCode);
 void copyToClipboard(const char *text);
 char* readFile(const char *filename);
 int copyToDisk();
-char* clipboard_command();
+void handle_key_event(bool cmd, bool shift, int keyCode);
 
 #ifdef CORE_IMPL
-#ifdef _POSIX_VERSION
-int command_exists(const char *cmd) {
-    char buffer[256];
-    snprintf(buffer, sizeof(buffer), "command -v %s >/dev/null 2>&1", cmd);
-    return system(buffer) == 0;
-}
-char* clipboard_command()
+bool isInFront = false;
+char* content = NULL;
+Stack stack = {};
+
+void handle_key_event(bool cmd, bool shift, int keyCode)
 {
-    #ifdef __APPLE__
-    return "pbpaste";
-    #elif __linux__    
-    if (command_exists("wl-paste")) {
-        return "wl-paste";
-    } else if (command_exists("xclip")) {
-        return "xclip";
+    printf("%d,%d,%d\n",cmd, shift, keyCode);
+    if(cmd && keyCode == 'C'){ // CMD + C (cmd && keyCode == kVK_ANSI_C) {
+        printf("Copy to clipboard\n");
+        copyToDisk();
     }
-    #else
-    perror("Unknown clipboard tool");
-    #endif
+    
+    initialize(&stack);
+    update_clipboard_entries(&stack);
+
+    if(cmd && shift && keyCode == 'V'){ // CMD + shift + V
+ 	    printf("open menu for selecting copied content");
+    }
+
+    if(cmd && isInFront){
+        int index = get_index(keyCode) - 1;
+        if(index >= 0 && index <= stack.top) {
+            int timestamp = stack.data[stack.top - index];
+            dynamic_string ds = {};
+            get_clipboard_entry_filename(&ds, timestamp);
+            content = readFile(ds.s);
+            if(content != NULL){
+               copyToClipboard(content);
+            }
+        }
+    }
 }
-#endif
+
 void get_clipboard_entry_filename(dynamic_string* ds, int timestamp)
 {
     create_dynamic_string(ds, "copy_");
